@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+echo "Applying database migrations..."
+python manage.py migrate --noinput
+
+echo "Starting Django dev server on 0.0.0.0:8000..."
+exec python manage.py runserver 0.0.0.0:8000
