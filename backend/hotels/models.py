@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 class HotelSearch(models.Model):
     """Audit log of hotel searches issued against Amadeus.
@@ -20,3 +20,15 @@ class HotelSearch(models.Model):
 
     def __str__(self) -> str:
         return f"{self.city_code} {self.check_in_date}→{self.check_out_date} ({self.adults} adult)"
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="favorites")
+    hotel_id = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'hotel_id')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.hotel_id}"

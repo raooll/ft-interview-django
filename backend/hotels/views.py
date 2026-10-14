@@ -1,12 +1,14 @@
 from datetime import date
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from .amadeus import AmadeusError, get_client
-from .models import HotelSearch
-from .serializers import HotelSearchSerializer
+from .models import HotelSearch, Favorite
+from .serializers import HotelSearchSerializer, FavoriteSerializer
+from rest_framework.permissions import IsAuthenticated
+
 
 
 def _parse_date(value: str | None) -> date | None:
@@ -69,6 +71,32 @@ def search_hotels(request):
             status=status.HTTP_502_BAD_GATEWAY,
         )
 
+    print(request.user)
+
+    # Check favorites for authenticated users in a single efficient query
+    user_favorites = set()
+    if request.user and request.user.is_authenticated:
+        # Extract hotel IDs present in the returned offers
+        offer_hotel_ids = [
+            offer.get("hotel", {}).get("hotelId")
+            for offer in offers
+            if offer.get("hotel", {}).get("hotelId")
+        ]
+
+        if offer_hotel_ids:
+            user_favorites = set(
+                Favorite.objects.filter(
+                    user=request.user, hotel_id__in=offer_hotel_ids
+                ).values_list("hotel_id", flat=True)
+            )
+
+    # Inject is_favorite status into each offer's hotel object
+    for offer in offers:
+        hotel_data = offer.get("hotel")
+        if isinstance(hotel_data, dict):
+            h_id = hotel_data.get("hotelId")
+            hotel_data["favorite"] = h_id in user_favorites if h_id else False
+
     HotelSearch.objects.create(
         city_code=city_code,
         check_in_date=check_in,
@@ -96,7 +124,6 @@ def search_history(_request):
     """Most recent hotel searches. Useful as a built-in 'something to extend'."""
     qs = HotelSearch.objects.all()[:20]
     return Response(HotelSearchSerializer(qs, many=True).data)
-
 
 @api_view(["GET"])
 def get_hotel(request, hotel_id: str):
@@ -129,5 +156,59 @@ def get_hotel(request, hotel_id: str):
             {"error": "Hotel not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
+
+    is_favorite = False
+    if request.user and request.user.is_authenticated:
+        is_favorite = Favorite.objects.filter(user=request.user, hotel_id=hotel_id).exists()
+
+    if isinstance(hotel, dict):
+        hotel["favorite"] = is_favorite
     else:
-        return Response(hotel)
+        try:
+            hotel["favorite"] = is_favorite
+        except (TypeError, KeyError):
+            pass
+
+    return Response(hotel)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def favorites_list_create(request):
+    """List all favorites for the authenticated user, or add a new favorite."""
+    if request.method == "GET":
+        favorites = Favorite.objects.filter(user=request.user)
+        serializer = FavoriteSerializer(favorites, many=True)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        serializer = FavoriteSerializer(data=request.data)
+        if serializer.is_valid():
+            hotel_id = serializer.validated_data.get("hotel_id")
+            
+            # Prevent duplicate favorites for the same user
+            if Favorite.objects.filter(user=request.user, hotel_id=hotel_id).exists():
+                return Response(
+                    {"error": "Hotel is already in favorites."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def favorite_delete(request, hotel_id: str):
+    """Remove a hotel from the authenticated user's favorites by hotel_id."""
+    try:
+        favorite = Favorite.objects.get(user=request.user, hotel_id=hotel_id)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Favorite.DoesNotExist:
+        return Response(
+            {"error": "Favorite not found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
