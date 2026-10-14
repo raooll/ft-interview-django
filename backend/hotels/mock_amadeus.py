@@ -39,6 +39,15 @@ class MockAmadeusClient:
         # Same constructor signature as AmadeusClient so the swap is silent.
         pass
 
+    def get_hotel_by_id(self, hotel_id) -> dict[str, any]:
+        """Find a mock hotel by its hotelId across all cities."""
+        hotel_id = hotel_id.strip()
+        for city_code, city_hotels in MOCK_HOTELS_BY_CITY.items():
+            for hotel in city_hotels:
+                if hotel["hotelId"] == hotel_id:
+                    return hotel
+        return None
+
     def hotels_by_city(self, city_code: str, limit: int = 20) -> list[dict[str, Any]]:
         rows = MOCK_HOTELS_BY_CITY.get(city_code.upper(), [])
         return [

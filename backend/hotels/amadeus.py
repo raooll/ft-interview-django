@@ -111,6 +111,9 @@ class AmadeusClient:
             raise AmadeusError(f"GET {path} failed: {resp.status_code} {resp.text}")
         return resp.json()
 
+    def get_hotel_by_id(self, hotel_id: str) -> dict[str, str]:
+        raise NotImplementedError("This function has not been implemented yet.")
+
     def hotels_by_city(self, city_code: str, limit: int = 20) -> list[dict[str, Any]]:
         """List hotels in a given IATA city code (e.g. 'PAR', 'NYC')."""
         data = self._get(
