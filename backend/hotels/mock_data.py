@@ -19,7 +19,7 @@ MOCK_HOTELS_BY_CITY: dict[str, list[dict]] = {
         {"hotelId": "MCPAR007", "name": "ibis Paris Tour Eiffel", "chainCode": "RT", "latitude": 48.8556, "longitude": 2.2913, "basePrice": 145, "currency": "EUR", "category": "STANDARD_ROOM", "beds": 1, "bedType": "DOUBLE"},
         {"hotelId": "MCPAR008", "name": "Generator Paris", "chainCode": "GN", "latitude": 48.8821, "longitude": 2.3653, "basePrice": 95, "currency": "EUR", "category": "STANDARD_ROOM", "beds": 2, "bedType": "TWIN"},
     ],
-    "": [
+    "LON": [
         {"hotelId": "MCLON001", "name": "The Savoy", "chainCode": "FH", "latitude": 51.5101, "longitude": -0.1198, "basePrice": 980, "currency": "GBP", "category": "DELUXE_ROOM", "beds": 1, "bedType": "KING"},
         {"hotelId": "MCLON002", "name": "Claridge's", "chainCode": "MO", "latitude": 51.5128, "longitude": -0.1480, "basePrice": 1150, "currency": "GBP", "category": "SUPERIOR_ROOM", "beds": 1, "bedType": "KING"},
         {"hotelId": "MCLON003", "name": "The Langham London", "chainCode": "LH", "latitude": 51.5176, "longitude": -0.1438, "basePrice": 720, "currency": "GBP", "category": "DELUXE_ROOM", "beds": 1, "bedType": "QUEEN"},
