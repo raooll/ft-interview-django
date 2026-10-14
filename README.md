@@ -1,4 +1,17 @@
-# ft-interview-django
+# Status
+
+All task marked with " ✅️" have been completed
+
+- Add a **hotel detail page** that hits a `/api/hotels/<hotelId>` endpoint. ✅️
+- **Persist favorites** — let the user star a hotel and list them on `/favorites`.✅️
+- Add **filters** (price range, board type, rating) on the results page. ✅️
+- Replace the SSR-less client component with a **React Server Component** that streams results.✅️
+- Add **tests** (pytest + DRF APIClient on the backend, Playwright on the frontend).🟡
+- Add **caching** (Redis, or DRF's `cache_page`) for the search endpoint — useful even with the mock, essential against a real rate-limited provider.🟡
+- Add **observability**: structured logs, a `/metrics` Prometheus endpoint, traces.🟡
+
+
+
 
 Take-home / pairing boilerplate for a **Fresh Tracks Canada** interview.
 
