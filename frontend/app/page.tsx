@@ -1,7 +1,10 @@
+// app/page.tsx
 import { Suspense } from "react";
 import { searchHotels, type HotelOffer, type HotelSearchResponse } from "@/lib/api";
 import Link from "next/link";
 import HotelFilters from "@/components/HotelFilters";
+import FavoriteButton from "@/components/FavoriteButton"; 
+import { cookies } from "next/headers";
 
 function isoDateOffset(days: number): string {
   const d = new Date();
@@ -25,7 +28,6 @@ interface PageProps {
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams;
-  
   const cityCode = params.cityCode ?? "PAR";
   const checkInDate = params.checkInDate ?? isoDateOffset(7);
   const checkOutDate = params.checkOutDate ?? isoDateOffset(9);
@@ -118,13 +120,17 @@ async function HotelResultsStream({
   let data: HotelSearchResponse;
   let error: string | null = null;
 
+  // Grab HttpOnly cookie safely on the server side during SSR
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token")?.value;
+
   try {
     data = await searchHotels({
       cityCode: cityCode.trim().toUpperCase(),
       checkInDate,
       checkOutDate,
       adults,
-    });
+    }, token);
   } catch (err) {
     error = err instanceof Error ? err.message : String(err);
     data = { count: 0, query: { cityCode, checkInDate, checkOutDate, adults }, results: [] };
@@ -215,23 +221,28 @@ function HotelCard({ offer }: { offer: HotelOffer }) {
   const hotelId = offer.hotel?.hotelId;
 
   return (
-    <div className="flex items-start justify-between gap-4">
-      <div>
-        <Link
-          href={`/hotels/${hotelId}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium hover:underline text-blue-600 inline-flex items-center gap-1"
-        >
-          {name}
-        </Link>
-        <p className="text-xs uppercase tracking-wide text-slate-500 mt-1">
+    <div className="flex items-start justify-between gap-4 p-4 bg-white border border-slate-200 rounded-lg shadow-sm">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          {hotelId && <FavoriteButton hotelId={hotelId} initialIsFavorite={offer.hotel?.favorite} />}
+          
+          <Link
+            href={`/hotels/${hotelId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium hover:underline text-blue-600 inline-flex items-center gap-1 text-base"
+          >
+            {name}
+          </Link>
+        </div>
+        <p className="text-xs uppercase tracking-wide text-slate-500 pl-9">
           {cityCode}
           {category ? ` · ${category.replace(/_/g, " ")}` : ""}
           {beds ? ` · ${beds} bed${beds > 1 ? "s" : ""}` : ""}
           {bedType ? ` (${bedType})` : ""}
         </p>
       </div>
+
       <div className="shrink-0 text-right">
         {price ? (
           <p className="font-mono text-base font-semibold text-slate-900">

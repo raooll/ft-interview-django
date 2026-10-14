@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getHotel, Hotel } from "@/lib/api";
+import FavoriteButton from "@/components/FavoriteButton";
 
 interface HotelPageProps {
   params: {
@@ -105,20 +106,27 @@ function HotelDetailClient({ hotelId }: { hotelId: string }) {
     return <p className="text-sm text-slate-500">Hotel not found.</p>;
   }
 
-  return (
+ return (
     <div className="flex items-start justify-between gap-4 p-4 border rounded-lg bg-white shadow-sm">
-      <div>
-        <p className="font-medium text-lg">{hotel.name}</p>
-        <p className="text-xs uppercase tracking-wide text-slate-500">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          {/* Add the Favorite Button here */}
+          {hotelId && <FavoriteButton hotelId={hotelId} initialIsFavorite={hotel.favorite}/>}
+          
+          <p className="font-medium text-lg">{hotel.name}</p>
+        </div>
+
+        <p className="text-xs uppercase tracking-wide text-slate-500 pl-9">
           Chain: {hotel.chainCode}
           {hotel.category ? ` · ${hotel.category}` : ""}
           {hotel.beds ? ` · ${hotel.beds} bed${hotel.beds > 1 ? "s" : ""}` : ""}
           {hotel.bedType ? ` (${hotel.bedType})` : ""}
         </p>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-slate-400 mt-1 pl-9">
           Coords: {hotel.latitude}, {hotel.longitude}
         </p>
       </div>
+
       <div className="shrink-0 text-right">
         {hotel.basePrice ? (
           <p className="font-mono text-base font-semibold">
