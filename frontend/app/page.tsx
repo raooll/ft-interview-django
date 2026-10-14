@@ -7,6 +7,8 @@ import {
   type HotelSearchResponse,
 } from "@/lib/api";
 
+import Link from "next/link";
+
 function isoDateOffset(days: number): string {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + days);
@@ -149,11 +151,20 @@ function HotelCard({ offer }: { offer: HotelOffer }) {
   const currency = top?.price?.currency;
   const beds = top?.room?.typeEstimated?.beds;
   const category = top?.room?.typeEstimated?.category;
+  const hotelId = offer.hotel?.hotelId
 
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <p className="font-medium">{name}</p>
+        <Link
+            href={`/hotels/${hotelId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium hover:underline text-blue-600 inline-flex items-center gap-1"
+          >
+            {name}
+          </Link>
+        {/* <p className="font-medium">{name}</p> */}
         <p className="text-xs uppercase tracking-wide text-slate-500">
           {cityCode}
           {category ? ` · ${category}` : ""}

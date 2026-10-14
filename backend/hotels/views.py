@@ -96,3 +96,38 @@ def search_history(_request):
     """Most recent hotel searches. Useful as a built-in 'something to extend'."""
     qs = HotelSearch.objects.all()[:20]
     return Response(HotelSearchSerializer(qs, many=True).data)
+
+
+@api_view(["GET"])
+def get_hotel(request, hotel_id: str):
+    """Get hotel details and offers by hotel ID.
+
+    Path param:
+      hotel_id       Amadeus hotel ID (required)
+    """
+
+    errors: dict[str, str] = {}
+    if not hotel_id:
+        errors["hotelId"] = "Required hotel ID."
+
+    if errors:
+        return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    client = get_client()
+    try:
+        hotel = client.get_hotel_by_id(
+            hotel_id
+        )
+    except AmadeusError as exc:
+        return Response(
+            {"error": "amadeus_error", "detail": str(exc)},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if not hotel:
+        return Response(
+            {"error": "Hotel not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    else:
+        return Response(hotel)

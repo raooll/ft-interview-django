@@ -8,6 +8,23 @@ export type HotelSearchParams = {
   adults: number;
 };
 
+export type GetHotelParam = {
+  hotelId: string;
+}
+
+export type Hotel = {
+  hotelId: string;
+  name: string;
+  chainCode: string;
+  latitude: number;
+  longitude: number;
+  basePrice: number;
+  currency: string;
+  category: string;
+  beds: number;
+  bedType: string;
+}
+
 /** Result shape is the raw Amadeus hotel-offer object (kept untyped on purpose
  *  — candidates can model it themselves). */
 export type HotelOffer = Record<string, unknown> & {
@@ -24,6 +41,7 @@ export type HotelSearchResponse = {
   results: HotelOffer[];
 };
 
+
 export async function searchHotels(
   params: HotelSearchParams,
 ): Promise<HotelSearchResponse> {
@@ -38,5 +56,24 @@ export async function searchHotels(
     const body = await res.text();
     throw new Error(`Search failed (${res.status}): ${body}`);
   }
+  return res.json();
+}
+
+export async function getHotel(
+  params: GetHotelParam,
+): Promise<Hotel> {
+  const url = new URL(`${API_URL}/api/hotels/${params.hotelId}`);
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  
+  if (res.status === 404) {
+    throw new Error("NOT_FOUND");
+  }
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Search failed (${res.status}): ${body}`);
+  }
+  
   return res.json();
 }
