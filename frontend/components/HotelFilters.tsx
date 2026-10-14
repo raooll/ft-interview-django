@@ -130,14 +130,14 @@ export default function HotelFilters({
         </label>
 
         <label className="flex flex-col text-sm">
-          <span className="mb-1 font-medium text-slate-700">Max Price</span>
+          <span className="mb-1 font-medium ">Max Price</span>
           <input
             type="number"
             min={0}
             placeholder="e.g. 1000"
             defaultValue={maxPrice}
             onChange={(e) => handleMaxPriceChange(e.target.value)}
-            className="rounded border border-slate-300 px-2 py-1 bg-white"
+            className="rounded border border-slate-300 px-2 py-1"
           />
         </label>
 
@@ -146,7 +146,7 @@ export default function HotelFilters({
           <select
             defaultValue={category}
             onChange={(e) => updateParam("category", e.target.value)}
-            className="rounded border border-slate-300 px-2 py-1 bg-white"
+             className="rounded border border-slate-300 px-2 py-1"
           >
             <option value="ALL">All Categories</option>
             <option value="STANDARD_ROOM">Standard Room</option>

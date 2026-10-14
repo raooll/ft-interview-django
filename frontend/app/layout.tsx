@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "FT Interview — Hotels",
@@ -14,13 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-50 text-slate-900">
-        <div className="mx-auto max-w-5xl px-6 py-8">
-          <header className="mb-8 flex items-center justify-between">
-            <h1 className="text-2xl font-semibold">FT Interview — Hotels</h1>
-            <span className="text-xs text-slate-500">Django + Next.js</span>
-          </header>
-          {children}
-        </div>
+        <AuthProvider>
+          <div className="mx-auto max-w-5xl px-6 py-8">
+            <Header />
+            {children}
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

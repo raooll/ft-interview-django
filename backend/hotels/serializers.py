@@ -1,8 +1,7 @@
 from datetime import timezone as dt_timezone
-
 from rest_framework import serializers
 
-from .models import HotelSearch
+from .models import HotelSearch, Favorite
 
 
 class HotelSearchSerializer(serializers.ModelSerializer):
@@ -36,3 +35,10 @@ class HotelSearchSerializer(serializers.ModelSerializer):
         # which would not match JSON.stringify(Date) on the Hono side.
         dt = obj.created_at.astimezone(dt_timezone.utc)
         return f"{dt:%Y-%m-%dT%H:%M:%S}.{dt.microsecond // 1000:03d}Z"
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ['id', 'hotel_id', 'created_at']
+        read_only_fields = ['user']

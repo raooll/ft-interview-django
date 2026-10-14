@@ -25,8 +25,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     "hotels",
+    "users", 
 ]
 
 MIDDLEWARE = [
@@ -86,6 +88,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
@@ -96,6 +100,9 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",
     ),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "users.authentication.CookieTokenAuthentication",
+    )
 }
 
 AMADEUS_CLIENT_ID = os.environ.get("AMADEUS_CLIENT_ID", "")
